@@ -137,9 +137,8 @@ public class ForeachCompletionUtil {
                                                              String symbolName, TypeSymbol symbol,
                                                              List<TextEdit> textEdits) {
         String detail = "foreach var item in expr";
-        //change label and tests accordingly
         String label = "foreach";
-        String type = getTypeOfIteratorVariable(symbol);
+        String type = getTypeOfIteratorVariable(ctx, symbol);
         StringBuilder snippet = new StringBuilder("foreach");
         snippet.append(" ").append(type).append(" ")
                 .append(CommonUtil.getValidatedSymbolName(ctx, VAR_NAME)).append(" in ").append(symbolName)
