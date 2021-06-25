@@ -32,9 +32,9 @@ dependencies {
     implementation project(':ballerina-lang')
     implementation project(':ballerina-parser')
     implementation project(':ballerina-tools-api')
+    implementation 'com.google.code.gson:gson'
 
     implementation 'org.apache.commons:commons-lang3'
-    implementation 'com.google.code.gson:gson'
 
     testCompile 'org.testng:testng'
 }

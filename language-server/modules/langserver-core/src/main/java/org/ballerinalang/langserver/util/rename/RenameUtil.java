@@ -98,7 +98,7 @@ public class RenameUtil {
 
         return Optional.of(CommonUtil.toRange(tokenAtCursor.lineRange()));
     }
-    
+
     /**
      * Process a rename request and returns the text edits required to be made to complete the rename.
      *
@@ -111,6 +111,10 @@ public class RenameUtil {
 
         if (!CommonUtil.isValidIdentifier(newName)) {
             throw new UserErrorException("Invalid identifier provided");
+        }
+
+        if (CommonUtil.isKeyword(newName)) {
+            newName = CommonUtil.escapeReservedKeyword(newName);
         }
 
         Optional<Document> document = context.currentDocument();
@@ -135,12 +139,15 @@ public class RenameUtil {
         Map<Module, List<Location>> locationMap = ReferencesUtil.getReferences(context);
 
         Map<String, List<TextEdit>> changes = new HashMap<>();
-        locationMap.forEach((module, locations) ->
-                locations.forEach(location -> {
-                    String uri = ReferencesUtil.getUriFromLocation(module, location);
-                    List<TextEdit> textEdits = changes.computeIfAbsent(uri, k -> new ArrayList<>());
-                    textEdits.add(new TextEdit(ReferencesUtil.getRange(location), newName));
-                }));
+        for (Map.Entry<Module, List<Location>> entry : locationMap.entrySet()) {
+            Module module = entry.getKey();
+            List<Location> locations = entry.getValue();
+            for (Location location : locations) {
+                String uri = ReferencesUtil.getUriFromLocation(module, location);
+                List<TextEdit> textEdits = changes.computeIfAbsent(uri, k -> new ArrayList<>());
+                textEdits.add(new TextEdit(ReferencesUtil.getRange(location), newName));
+            }
+        }
         return changes;
     }
 
