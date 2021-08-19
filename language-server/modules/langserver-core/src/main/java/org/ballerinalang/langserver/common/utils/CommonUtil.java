@@ -137,6 +137,8 @@ public class CommonUtil {
 
     public static final boolean COMPILE_OFFLINE;
 
+    public static final boolean STICKY_BUILD_OPTION = true;
+
     public static final String BALLERINA_CMD;
 
     public static final String MARKDOWN_MARKUP_KIND = "markdown";
