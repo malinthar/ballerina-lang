@@ -31,6 +31,7 @@ import org.ballerinalang.langserver.commons.completion.LSCompletionException;
 import org.ballerinalang.langserver.commons.completion.LSCompletionItem;
 import org.ballerinalang.langserver.completions.util.ContextTypeResolver;
 import org.ballerinalang.langserver.completions.util.QNameRefCompletionUtil;
+import org.ballerinalang.langserver.completions.util.SortingUtil;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -91,12 +92,13 @@ public class ClientResourceAccessActionNodeContext
 
     /**
      * Checks if the cursor position is placed with in the resource method call parameter context.
+     *
      * @param node
      * @param context
      * @return
      */
     public static boolean isInResourceMethodParameterContext(ClientResourceAccessActionNode node,
-                                                       PositionedOperationContext context) {
+                                                             PositionedOperationContext context) {
         Optional<ParenthesizedArgList> arguments = node.arguments();
         int cursor = context.getCursorPositionInTree();
         return arguments.isPresent() && arguments.get().openParenToken().textRange().startOffset() <= cursor
@@ -123,8 +125,12 @@ public class ClientResourceAccessActionNodeContext
     @Override
     public void sort(BallerinaCompletionContext context, ClientResourceAccessActionNode node,
                      List<LSCompletionItem> completionItems) {
-        if (isInResourceMethodParameterContext(node, context)) {
-            super.sort(context, node, completionItems);
+        ContextTypeResolver resolver = new ContextTypeResolver(context);
+        Optional<TypeSymbol> contextType = node.apply(resolver);
+        if (isInResourceMethodParameterContext(node, context) && contextType.isPresent()) {
+            completionItems.forEach(lsCompletionItem -> SortingUtil.genSortTextByAssignability(context, lsCompletionItem, contextType.get()));
+            return;
         }
+        super.sort(context, node, completionItems);
     }
 }

@@ -165,12 +165,17 @@ public class ContextTypeResolver extends NodeTransformer<Optional<TypeSymbol>> {
         if (symbol.isEmpty() || symbol.get().kind() != SymbolKind.RESOURCE_METHOD) {
             return Optional.empty();
         }
-        if(ClientResourceAccessActionNodeContext.isInResourceMethodParameterContext(clientResourceAccessActionNode,context)) {
+        //If in method call context return the corresponding parameter type
+        if (ClientResourceAccessActionNodeContext.isInResourceMethodParameterContext(clientResourceAccessActionNode, context)) {
             Optional<ParenthesizedArgList> arguments = clientResourceAccessActionNode.arguments();
-//            TypeResolverUtil.resolveParameterTypeSymbol((FunctionTypeSymbol) symbol.get(), context, arguments);
-            String s = "S";
+            if (arguments.isEmpty()) {
+                return Optional.empty();
+            }
+            return TypeResolverUtil.resolveParameterTypeSymbol(((FunctionSymbol) symbol.get()).typeDescriptor(),
+                    context, arguments.get().arguments());
         }
-        return Optional.empty();
+        //return the type of resource method symbol
+        return Optional.of(((ResourceMethodSymbol) symbol.get()).typeDescriptor());
     }
 
     @Override
