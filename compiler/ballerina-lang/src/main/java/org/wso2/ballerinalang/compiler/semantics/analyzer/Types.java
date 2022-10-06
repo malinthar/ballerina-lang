@@ -1806,18 +1806,7 @@ public class Types {
                 varType = arrayType.eType;
                 break;
             case TypeTags.TUPLE:
-                BTupleType tupleType = (BTupleType) collectionType;
-                LinkedHashSet<BType> tupleTypes = new LinkedHashSet<>(tupleType.tupleTypes);
-                if (tupleType.restType != null) {
-                    tupleTypes.add(tupleType.restType);
-                }
-                int tupleTypeSize = tupleTypes.size();
-                if (tupleTypeSize == 0) {
-                    varType = symTable.neverType;
-                    break;
-                }
-                varType = tupleTypeSize == 1 ?
-                        tupleTypes.iterator().next() : BUnionType.create(null, tupleTypes);
+                varType = getTupleMemberType(collectionType);
                 break;
             case TypeTags.MAP:
                 BMapType bMapType = (BMapType) collectionType;
@@ -1979,17 +1968,7 @@ public class Types {
                 BArrayType arrayType = (BArrayType) collectionType;
                 return arrayType.eType;
             case TypeTags.TUPLE:
-                BTupleType tupleType = (BTupleType) collectionType;
-                LinkedHashSet<BType> tupleTypes = new LinkedHashSet<>(tupleType.tupleTypes);
-                if (tupleType.restType != null) {
-                    tupleTypes.add(tupleType.restType);
-                }
-                int tupleTypesSize = tupleTypes.size();
-                if (tupleTypesSize == 0) {
-                    return symTable.neverType;
-                }
-                return tupleTypesSize == 1 ?
-                        tupleTypes.iterator().next() : BUnionType.create(null, tupleTypes);
+                return getTupleMemberType(collectionType);
             case TypeTags.MAP:
                 BMapType bMapType = (BMapType) collectionType;
                 return bMapType.constraint;
@@ -2044,6 +2023,20 @@ public class Types {
                         collectionType);
         }
         return symTable.semanticError;
+    }
+
+    private BType getTupleMemberType(BType collectionType) {
+        BTupleType tupleType = (BTupleType) collectionType;
+        LinkedHashSet<BType> tupleTypes = new LinkedHashSet<>(tupleType.tupleTypes);
+        if (tupleType.restType != null) {
+            tupleTypes.add(tupleType.restType);
+        }
+        int tupleTypesSize = tupleTypes.size();
+        if (tupleTypesSize == 0) {
+            return symTable.neverType;
+        }
+        return tupleTypesSize == 1 ?
+                tupleTypes.iterator().next() : BUnionType.create(null, tupleTypes);
     }
 
     public BUnionType getVarTypeFromIterableObject(BObjectType collectionType) {
