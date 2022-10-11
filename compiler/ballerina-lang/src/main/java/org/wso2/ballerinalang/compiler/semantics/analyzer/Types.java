@@ -1806,7 +1806,7 @@ public class Types {
                 varType = arrayType.eType;
                 break;
             case TypeTags.TUPLE:
-                varType = getTupleMemberType(collectionType);
+                varType = getTupleMemberType((BTupleType) collectionType);
                 break;
             case TypeTags.MAP:
                 BMapType bMapType = (BMapType) collectionType;
@@ -1968,7 +1968,7 @@ public class Types {
                 BArrayType arrayType = (BArrayType) collectionType;
                 return arrayType.eType;
             case TypeTags.TUPLE:
-                return getTupleMemberType(collectionType);
+                return getTupleMemberType((BTupleType) collectionType);
             case TypeTags.MAP:
                 BMapType bMapType = (BMapType) collectionType;
                 return bMapType.constraint;
@@ -2025,8 +2025,7 @@ public class Types {
         return symTable.semanticError;
     }
 
-    private BType getTupleMemberType(BType collectionType) {
-        BTupleType tupleType = (BTupleType) collectionType;
+    private BType getTupleMemberType(BTupleType tupleType) {
         LinkedHashSet<BType> tupleTypes = new LinkedHashSet<>(tupleType.tupleTypes);
         if (tupleType.restType != null) {
             tupleTypes.add(tupleType.restType);
