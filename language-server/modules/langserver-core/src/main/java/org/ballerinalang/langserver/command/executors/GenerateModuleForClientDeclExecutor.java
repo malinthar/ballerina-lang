@@ -118,6 +118,12 @@ public class GenerateModuleForClientDeclExecutor implements LSCommandExecutor {
                             filePath.toUri().toString(),
                             context.workspace(), LSContextOperation.TXT_DID_CHANGE,
                             context.languageServercontext());
+                    try {
+                        //Todo: Temporary fix to sleep until didChangeWatchFiles diagnostic publishing is complete
+                        Thread.sleep(5 * 1000);
+                    } catch (InterruptedException e) {
+                        throw new RuntimeException(e);
+                    }
                     DiagnosticsHelper.getInstance(context.languageServercontext())
                             .schedulePublishDiagnostics(languageClient, docContext);
                 })
