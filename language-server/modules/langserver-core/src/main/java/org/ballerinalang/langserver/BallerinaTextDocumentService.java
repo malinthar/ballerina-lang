@@ -31,6 +31,7 @@ import org.ballerinalang.langserver.commons.CompletionContext;
 import org.ballerinalang.langserver.commons.DocumentServiceContext;
 import org.ballerinalang.langserver.commons.DocumentSymbolContext;
 import org.ballerinalang.langserver.commons.FoldingRangeContext;
+import org.ballerinalang.langserver.commons.FormattingContext;
 import org.ballerinalang.langserver.commons.HoverContext;
 import org.ballerinalang.langserver.commons.LanguageServerContext;
 import org.ballerinalang.langserver.commons.PrepareRenameContext;
@@ -356,8 +357,8 @@ class BallerinaTextDocumentService implements TextDocumentService {
             try {
                 ResolvableCodeAction resolvableCodeAction = ResolvableCodeAction.from(codeAction);
                 if (resolvableCodeAction.getData() == null || resolvableCodeAction.getData().getFileUri() == null) {
-                   // Probably not a resolvable code action. Can be the client sending resolve request for a
-                   // scenario where code action's text edit is empty
+                    // Probably not a resolvable code action. Can be the client sending resolve request for a
+                    // scenario where code action's text edit is empty
                     this.clientLogger.logWarning("Invalid resolvable code action received: " + codeAction.getTitle());
                     return codeAction;
                 }
@@ -425,17 +426,17 @@ class BallerinaTextDocumentService implements TextDocumentService {
     public CompletableFuture<List<? extends TextEdit>> formatting(DocumentFormattingParams params) {
         return CompletableFutures.computeAsync((cancelChecker) -> {
             String fileUri = params.getTextDocument().getUri();
-            DocumentServiceContext context = ContextBuilder.buildDocumentServiceContext(fileUri,
+            FormattingContext context = ContextBuilder.buildFormattingContext(params, fileUri,
                     this.workspaceManagerProxy.get(),
-                    LSContextOperation.TXT_FORMATTING,
                     this.serverContext,
+                    this.clientCapabilities,
                     cancelChecker);
             try {
                 Optional<SyntaxTree> syntaxTree = context.currentSyntaxTree();
                 if (syntaxTree.isEmpty()) {
                     return Collections.emptyList();
                 }
-                String formattedSource = Formatter.format(syntaxTree.get()).toSourceCode();
+                String formattedSource = Formatter.format(syntaxTree.get(), context.formattingOptions()).toSourceCode();
                 LinePosition eofPos = syntaxTree.get().rootNode().lineRange().endLine();
                 Range range = new Range(new Position(0, 0), new Position(eofPos.line() + 1, eofPos.offset()));
                 TextEdit textEdit = new TextEdit(range, formattedSource);

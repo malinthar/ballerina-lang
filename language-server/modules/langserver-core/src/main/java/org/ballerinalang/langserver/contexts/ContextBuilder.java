@@ -28,6 +28,7 @@ import org.ballerinalang.langserver.commons.DocumentServiceContext;
 import org.ballerinalang.langserver.commons.DocumentSymbolContext;
 import org.ballerinalang.langserver.commons.ExecuteCommandContext;
 import org.ballerinalang.langserver.commons.FoldingRangeContext;
+import org.ballerinalang.langserver.commons.FormattingContext;
 import org.ballerinalang.langserver.commons.HoverContext;
 import org.ballerinalang.langserver.commons.LanguageServerContext;
 import org.ballerinalang.langserver.commons.PrepareRenameContext;
@@ -40,6 +41,7 @@ import org.ballerinalang.langserver.commons.command.CommandArgument;
 import org.ballerinalang.langserver.commons.workspace.WorkspaceManager;
 import org.eclipse.lsp4j.CodeActionParams;
 import org.eclipse.lsp4j.CompletionCapabilities;
+import org.eclipse.lsp4j.DocumentFormattingParams;
 import org.eclipse.lsp4j.DocumentSymbolParams;
 import org.eclipse.lsp4j.Position;
 import org.eclipse.lsp4j.RenameParams;
@@ -302,7 +304,7 @@ public class ContextBuilder {
      * Build DidChangeWatchedFiles context.
      *
      * @param workspaceManager workspace manager instance
-     * @param serverContext language server context
+     * @param serverContext    language server context
      * @return {@link DidChangeWatchedFilesContext}
      */
     public static DidChangeWatchedFilesContext buildDidChangeWatchedFilesContext(WorkspaceManager workspaceManager,
@@ -359,9 +361,9 @@ public class ContextBuilder {
     /**
      * Build the document symbols context.
      *
-     * @param params document symbol params.
-     * @param workspaceManager workspace manager instance.
-     * @param serverContext language server context.
+     * @param params             document symbol params.
+     * @param workspaceManager   workspace manager instance.
+     * @param serverContext      language server context.
      * @param clientCapabilities client capabilities.
      * @return {@link DocumentSymbolContext} generated document symbol context.
      */
@@ -389,6 +391,28 @@ public class ContextBuilder {
                                                                    LanguageServerContext serverContext,
                                                                    CancelChecker cancelChecker) {
         return new SemanticTokensContextImpl.SemanticTokensContextBuilder(serverContext)
+                .withFileUri(uri)
+                .withWorkspaceManager(workspaceManager)
+                .withCancelChecker(cancelChecker)
+                .build();
+    }
+
+    /**
+     * Build the semantic tokens context.
+     *
+     * @param uri              file uri
+     * @param workspaceManager workspace manager instance
+     * @param serverContext    language server context
+     * @param cancelChecker    cancellation checker
+     * @return {@link SemanticTokensContext} generated semantic tokens context
+     */
+    public static FormattingContext buildFormattingContext(DocumentFormattingParams params,
+                                                           String uri,
+                                                           WorkspaceManager workspaceManager,
+                                                           LanguageServerContext serverContext,
+                                                           LSClientCapabilities clientCapabilities,
+                                                           CancelChecker cancelChecker) {
+        return new FormattingContextImpl.FormattingContextBuilder(params, serverContext, clientCapabilities)
                 .withFileUri(uri)
                 .withWorkspaceManager(workspaceManager)
                 .withCancelChecker(cancelChecker)
